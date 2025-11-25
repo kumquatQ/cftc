@@ -4351,7 +4351,12 @@ function generateAdminPage(fileCards, categoryOptions) {
         }
       }
       function showChangeCategoryModal(url, currentCategoryId) {
-        if (!changeCategoryModal) return;
+        console.log('Open Category Modal:', url, currentCategoryId);
+        if (!changeCategoryModal) {
+          console.error('Category modal element not found!');
+          alert('Error: Category modal not found');
+          return;
+        }
         currentCategoryUrl = url;
         if (changeCategorySelect) {
           changeCategorySelect.value = currentCategoryId || '';
