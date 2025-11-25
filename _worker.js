@@ -3960,6 +3960,12 @@ function generateAdminPage(fileCards, categoryOptions) {
         changeCategorySelect = document.getElementById('changeCategorySelect');
         changeCategoryConfirm = document.getElementById('changeCategoryConfirm');
         changeCategoryCancel = document.getElementById('changeCategoryCancel');
+        
+        // Ensure all modals start hidden - remove any 'show' classes
+        if (confirmModal) confirmModal.classList.remove('show');
+        if (editSuffixModal) editSuffixModal.classList.remove('show');
+        if (changeCategoryModal) changeCategoryModal.classList.remove('show');
+        
         console.log('页面元素引用:', {
           confirmModal: !!confirmModal,
           editSuffixModal: !!editSuffixModal,
