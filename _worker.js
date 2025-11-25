@@ -4747,48 +4747,5 @@ async function fetchNotification() {
     return null;
   }
 }
-function copyShareUrl(url, fileName) {
-  console.log('复制分享链接:', url);
-  try {
-    navigator.clipboard.writeText(url)
-      .then(() => {
-        alert('链接已复制到剪贴板: ' + url);
-      })
-      .catch((err) => {
-        console.error('复制失败:', err);
-        prompt('请手动复制以下链接:', url);
-      });
-  } catch (error) {
-    console.error('复制出错:', error);
-    prompt('请手动复制以下链接:', url);
-  }
-}
-try {
-  document.addEventListener('DOMContentLoaded', function () {
-    try {
-      console.log('DOM加载完成，初始化页面元素引用');
-      window.editSuffixModal = document.getElementById('editSuffixModal');
-      if (window.editSuffixModal) {
-        console.log('成功获取修改后缀弹窗元素');
-      } else {
-        console.error('无法获取修改后缀弹窗元素');
-      }
-      window.currentEditUrl = '';
-      window.shareFile = shareFile;
-      window.showConfirmModal = showConfirmModal;
-      window.showEditSuffixModal = showEditSuffixModal;
-      window.deleteFile = deleteFile;
-      window.handleConfirmModalConfirm = handleConfirmModalConfirm;
-      window.closeConfirmModal = closeConfirmModal;
-      window.confirmModal = document.getElementById('confirmModal');
-      window.confirmModalMessage = document.getElementById('confirmModalMessage');
-      window.confirmModalConfirm = document.getElementById('confirmModalConfirm');
-      window.confirmModalCancel = document.getElementById('confirmModalCancel');
-    } catch (error) {
-      console.error('初始化页面元素引用时出错:', error);
-    }
-  });
-} catch (error) {
-  console.error('添加DOMContentLoaded事件监听器失败:', error);
-}
+
 
