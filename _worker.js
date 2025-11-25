@@ -4394,11 +4394,15 @@ function generateAdminPage(fileCards, categoryOptions) {
           console.error('changeCategorySelect is null!');
         }
         
-        console.log('Adding show class to modal');
-        console.log('Modal classes before:', changeCategoryModal.className);
-        changeCategoryModal.classList.add('show');
-        console.log('Modal classes after:', changeCategoryModal.className);
-        console.log('Modal display style:', window.getComputedStyle(changeCategoryModal).display);
+        // Remove show class first to ensure animation triggers
+        changeCategoryModal.classList.remove('show');
+        // Use setTimeout to force reflow and trigger animation
+        setTimeout(() => {
+          console.log('Adding show class to modal');
+          console.log('Modal classes before:', changeCategoryModal.className);
+          changeCategoryModal.classList.add('show');
+          console.log('Modal classes after:', changeCategoryModal.className);
+        }, 10);
       }
       async function updateFileCategory() {
         if (!changeCategorySelect) return;
