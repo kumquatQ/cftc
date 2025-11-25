@@ -4360,24 +4360,19 @@ function generateAdminPage(fileCards, categoryOptions) {
         }
       }
       function showChangeCategoryModal(url, currentCategoryId) {
-        console.log('Open Category Modal:', url, currentCategoryId);
-        console.log('Initial changeCategoryModal:', changeCategoryModal);
-        
         // Lazy load elements if not found
         if (!changeCategoryModal) {
-          console.log('Lazy loading modal elements...');
           changeCategoryModal = document.getElementById('changeCategoryModal');
           changeCategorySelect = document.getElementById('changeCategorySelect');
           changeCategoryConfirm = document.getElementById('changeCategoryConfirm');
           changeCategoryCancel = document.getElementById('changeCategoryCancel');
           
-          console.log('After lazy load - modal:', changeCategoryModal);
-          console.log('After lazy load - select:', changeCategorySelect);
-          
-          // Re-bind events if needed
           if (changeCategoryCancel) {
              changeCategoryCancel.onclick = function() {
-               if (changeCategoryModal) changeCategoryModal.classList.remove('show');
+               if (changeCategoryModal) {
+                 changeCategoryModal.style.display = 'none';
+                 changeCategoryModal.style.opacity = '0';
+               }
              };
           }
           if (changeCategoryConfirm) {
@@ -4386,29 +4381,18 @@ function generateAdminPage(fileCards, categoryOptions) {
         }
 
         if (!changeCategoryModal) {
-          console.error('Category modal element not found in DOM!');
           alert('Error: Category modal not found. Please refresh the page.');
           return;
         }
         
-        console.log('Setting currentCategoryUrl to:', url);
         currentCategoryUrl = url;
         if (changeCategorySelect) {
-          console.log('Setting select value to:', currentCategoryId || '');
           changeCategorySelect.value = currentCategoryId || '';
-        } else {
-          console.error('changeCategorySelect is null!');
         }
         
-        // Remove show class first to ensure animation triggers
-        changeCategoryModal.classList.remove('show');
-        // Use setTimeout to force reflow and trigger animation
-        setTimeout(() => {
-          console.log('Adding show class to modal');
-          console.log('Modal classes before:', changeCategoryModal.className);
-          changeCategoryModal.classList.add('show');
-          console.log('Modal classes after:', changeCategoryModal.className);
-        }, 10);
+        // Direct style manipulation - guaranteed to work
+        changeCategoryModal.style.display = 'flex';
+        changeCategoryModal.style.opacity = '1';
       }
       async function updateFileCategory() {
         if (!changeCategorySelect) return;
@@ -4428,7 +4412,10 @@ function generateAdminPage(fileCards, categoryOptions) {
           });
           const data = await response.json();
           if (data.status === 1) {
-            if (changeCategoryModal) changeCategoryModal.classList.remove('show');
+            if (changeCategoryModal) {
+              changeCategoryModal.style.display = 'none';
+              changeCategoryModal.style.opacity = '0';
+            }
             showConfirmModal(data.msg, () => {
               window.location.reload();
             }, true);
