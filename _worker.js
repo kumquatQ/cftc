@@ -4204,6 +4204,9 @@ function generateAdminPage(fileCards, categoryOptions) {
         if (editSuffixModal && event.target === editSuffixModal) {
           editSuffixModal.classList.remove('show');
         }
+        if (changeCategoryModal && event.target === changeCategoryModal) {
+          changeCategoryModal.classList.remove('show');
+        }
       }
       function showEditSuffixModal(url) {
         console.log('显示修改后缀弹窗:', url, '弹窗元素:', !!editSuffixModal);
@@ -4352,6 +4355,7 @@ function generateAdminPage(fileCards, categoryOptions) {
       }
       function showChangeCategoryModal(url, currentCategoryId) {
         console.log('Open Category Modal:', url, currentCategoryId);
+        console.log('Initial changeCategoryModal:', changeCategoryModal);
         
         // Lazy load elements if not found
         if (!changeCategoryModal) {
@@ -4360,6 +4364,9 @@ function generateAdminPage(fileCards, categoryOptions) {
           changeCategorySelect = document.getElementById('changeCategorySelect');
           changeCategoryConfirm = document.getElementById('changeCategoryConfirm');
           changeCategoryCancel = document.getElementById('changeCategoryCancel');
+          
+          console.log('After lazy load - modal:', changeCategoryModal);
+          console.log('After lazy load - select:', changeCategorySelect);
           
           // Re-bind events if needed
           if (changeCategoryCancel) {
@@ -4378,11 +4385,20 @@ function generateAdminPage(fileCards, categoryOptions) {
           return;
         }
         
+        console.log('Setting currentCategoryUrl to:', url);
         currentCategoryUrl = url;
         if (changeCategorySelect) {
+          console.log('Setting select value to:', currentCategoryId || '');
           changeCategorySelect.value = currentCategoryId || '';
+        } else {
+          console.error('changeCategorySelect is null!');
         }
+        
+        console.log('Adding show class to modal');
+        console.log('Modal classes before:', changeCategoryModal.className);
         changeCategoryModal.classList.add('show');
+        console.log('Modal classes after:', changeCategoryModal.className);
+        console.log('Modal display style:', window.getComputedStyle(changeCategoryModal).display);
       }
       async function updateFileCategory() {
         if (!changeCategorySelect) return;
