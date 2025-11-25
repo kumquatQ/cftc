@@ -3903,6 +3903,7 @@ function generateAdminPage(fileCards, categoryOptions) {
             <button class="modal-button modal-cancel" id="editSuffixCancel">取消</button>
           </div>
         </div>
+      </div>
       <!-- 修改分类弹窗 -->
       <div id="changeCategoryModal" class="modal">
         <div class="modal-content">
