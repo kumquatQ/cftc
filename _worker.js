@@ -4352,11 +4352,32 @@ function generateAdminPage(fileCards, categoryOptions) {
       }
       function showChangeCategoryModal(url, currentCategoryId) {
         console.log('Open Category Modal:', url, currentCategoryId);
+        
+        // Lazy load elements if not found
         if (!changeCategoryModal) {
-          console.error('Category modal element not found!');
-          alert('Error: Category modal not found');
+          console.log('Lazy loading modal elements...');
+          changeCategoryModal = document.getElementById('changeCategoryModal');
+          changeCategorySelect = document.getElementById('changeCategorySelect');
+          changeCategoryConfirm = document.getElementById('changeCategoryConfirm');
+          changeCategoryCancel = document.getElementById('changeCategoryCancel');
+          
+          // Re-bind events if needed
+          if (changeCategoryCancel) {
+             changeCategoryCancel.onclick = function() {
+               if (changeCategoryModal) changeCategoryModal.classList.remove('show');
+             };
+          }
+          if (changeCategoryConfirm) {
+             changeCategoryConfirm.onclick = updateFileCategory;
+          }
+        }
+
+        if (!changeCategoryModal) {
+          console.error('Category modal element not found in DOM!');
+          alert('Error: Category modal not found. Please refresh the page.');
           return;
         }
+        
         currentCategoryUrl = url;
         if (changeCategorySelect) {
           changeCategorySelect.value = currentCategoryId || '';
