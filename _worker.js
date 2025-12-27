@@ -2112,7 +2112,9 @@ function getPreviewHtml(url) {
   const isVideo = ['mp4', 'webm'].includes(ext);
   const isAudio = ['mp3', 'wav', 'ogg'].includes(ext);
   if (isImage) {
-    return `<img src="${url}" alt="预览">`;
+    const time = Date.now();
+    const src = url.includes('?') ? `${url}&v=${time}` : `${url}?v=${time}`;
+    return `<img src="${src}" alt="预览">`;
   } else if (isVideo) {
     return `<video src="${url}" controls></video>`;
   } else if (isAudio) {
