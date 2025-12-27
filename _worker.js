@@ -2175,19 +2175,32 @@ async function handleFileRequest(request, config) {
         }
       }
     }
-    let file;
-    const urlPattern = `https://${config.domain}/${path}`;
-    file = await config.database.prepare('SELECT * FROM files WHERE url = ?').bind(urlPattern).first();
+
+    const fileName = path.split('/').pop();
+    let file = await config.database.prepare('SELECT * FROM files WHERE file_name = ?').bind(fileName).first();
+
     if (!file) {
       file = await config.database.prepare('SELECT * FROM files WHERE fileId = ?').bind(path).first();
     }
+
     if (!file) {
-      const fileName = path.split('/').pop();
-      file = await config.database.prepare('SELECT * FROM files WHERE file_name = ?').bind(fileName).first();
+      // Fallback: try removing extension or handling timestamp-only names if needed, 
+      // but for now let's try strict URL match as a last resort
+      const urlPattern = `https://${config.domain}/${path}`;
+      file = await config.database.prepare('SELECT * FROM files WHERE url = ?').bind(urlPattern).first();
     }
+
     if (!file) {
       return new Response('File not found', { status: 404 });
     }
+
+    // We found the file record. 
+    // IMPORTANT: We do NOT redirect here. Even if the DB has an old URL, 
+    // the user is currently accessing via the NEW domain (hosting this worker).
+    // We should just serve the content. 
+    // Redirecting causes loops if the DB and current domain mismatch.
+    // if (file.url && file.url !== urlPattern) { ... } // DELETED
+
     if (file.storage_type === 'telegram') {
       try {
         const telegramFileId = file.fileId;
@@ -2229,9 +2242,10 @@ async function handleFileRequest(request, config) {
         console.error('通过fileId从R2获取文件出错:', error.message);
       }
     }
-    if (file.url && file.url !== urlPattern) {
-      return Response.redirect(file.url, 302);
-    }
+    // Redirect logic removed to prevent loops during domain migration
+    // if (file.url && file.url !== urlPattern) {
+    //   return Response.redirect(file.url, 302);
+    // }
     return new Response('File not available', { status: 404 });
   } catch (error) {
     console.error('处理文件请求出错:', error.message);
