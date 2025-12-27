@@ -2176,18 +2176,20 @@ async function handleFileRequest(request, config) {
       }
     }
 
-    const fileName = path.split('/').pop();
-    let file = await config.database.prepare('SELECT * FROM files WHERE file_name = ?').bind(fileName).first();
+    // 1. Try exact URL match (First priority)
+    const urlPattern = `https://${config.domain}/${path}`;
+    let file = await config.database.prepare('SELECT * FROM files WHERE url = ?').bind(urlPattern).first();
 
+    // 2. Try fileId match (For R2 storage where fileId is the filename/key)
     if (!file) {
       file = await config.database.prepare('SELECT * FROM files WHERE fileId = ?').bind(path).first();
     }
 
+    // 3. Robust Fallback: Match by path suffix in 'url' column
+    // This handles cases where the DB has an old domain or a different protocol (http/https).
+    // We look for URLs ending with "/path"
     if (!file) {
-      // Fallback: try removing extension or handling timestamp-only names if needed, 
-      // but for now let's try strict URL match as a last resort
-      const urlPattern = `https://${config.domain}/${path}`;
-      file = await config.database.prepare('SELECT * FROM files WHERE url = ?').bind(urlPattern).first();
+      file = await config.database.prepare('SELECT * FROM files WHERE url LIKE ?').bind(`%/${path}`).first();
     }
 
     if (!file) {
@@ -2197,8 +2199,7 @@ async function handleFileRequest(request, config) {
     // We found the file record. 
     // IMPORTANT: We do NOT redirect here. Even if the DB has an old URL, 
     // the user is currently accessing via the NEW domain (hosting this worker).
-    // We should just serve the content. 
-    // Redirecting causes loops if the DB and current domain mismatch.
+    // We should just serve the content directly to prevent redirect loops.
     // if (file.url && file.url !== urlPattern) { ... } // DELETED
 
     if (file.storage_type === 'telegram') {
@@ -4464,17 +4465,29 @@ async function handleUpdateSuffixRequest(request, config) {
       }), { headers: { 'Content-Type': 'application/json' } });
     }
     const originalFileName = getFileName(url);
+
+    // 1. Try exact URL match
     let fileRecord = await config.database.prepare('SELECT * FROM files WHERE url = ?')
       .bind(url).first();
+
+    // 2. If not found, try matching by path suffix (handles domain mismatches)
+    if (!fileRecord) {
+      const pathSuffix = '/' + originalFileName;
+      fileRecord = await config.database.prepare('SELECT * FROM files WHERE url LIKE ?')
+        .bind(`%${pathSuffix}`).first();
+    }
+
+    // 3. If still not found, try fileId (valid for R2, usually not for Telegram unless fileId IS filename)
     if (!fileRecord) {
       fileRecord = await config.database.prepare('SELECT * FROM files WHERE fileId = ?')
         .bind(originalFileName).first();
-      if (!fileRecord) {
-        return new Response(JSON.stringify({
-          status: 0,
-          msg: '未找到对应的文件记录'
-        }), { headers: { 'Content-Type': 'application/json' } });
-      }
+    }
+
+    if (!fileRecord) {
+      return new Response(JSON.stringify({
+        status: 0,
+        msg: '未找到对应的文件记录'
+      }), { headers: { 'Content-Type': 'application/json' } });
     }
     const fileExt = originalFileName.split('.').pop();
     const newFileName = `${suffix}.${fileExt}`;
